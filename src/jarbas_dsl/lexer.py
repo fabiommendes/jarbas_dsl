@@ -1,26 +1,52 @@
-import ox
-
+import re
+from collections import namedtuple
 
 class Lexer:
 
     def __init__(self):
-        self.token_list = ['TEXT', 'VARIABLE', 'POINT', 'PIPE',
-                           'COMMENT_MARKER', 'PARENTHESES_O', 'PARENTHESES_C']
 
-        self.lexer = ox.make_lexer([
-            (self.token_list[0], r'[a-zA-Z_0-9!@#?%&*]+'),
-            (self.token_list[1], r'\$[a-zA-Z]([a-zA-Z0-9_]*)'),
-            (self.token_list[2], r'\.'),
-            (self.token_list[3], r'\|'),
-            (self.token_list[4], r'//'),
-            (self.token_list[5], r'\('),
-            (self.token_list[6], r'\)')
-        ])
+        # Regex map to capture language tokens
+        self.regex_map = [('VARIABLE', r'\$[a-zA-Z]([a-zA-Z0-9_]*)'),
+                          ('ATTRIB', r'\.[a-zA-Z]([a-zA-Z0-9_]*)'),
+                          ('PIPE', r'\|'),
+                          ('COMMENT_MARKER', r'//'),
+                          ('PARENTHESES_O', r'\('),
+                          ('PARENTHESES_C', r'\)'),
+                          ('NEWLINE', r'\n'),
+                          ('SPACE', r'\s+'),
+                          ('TEXT', r'\s*.+\s+')]
 
-    # Token list to be used on Parser
-    def get_token_list(self):
-        return self.token_list
+        # Template used to map a regex to a name
+        self.template = r'(?P<{name}>{regex})'
+
+        # Creating a big regex for jarbas dsl
+        self.REGEX_ALL = '|'.join(
+            self.template.format(name=name, regex=regex)
+            for (name, regex) in self.regex_map
+        )
+
+        self.re_all = re.compile(self.REGEX_ALL)
+        self.token_list = []
 
     # Create a list of tokens based on lexer rules and text passed as string
-    def generate_tokens(self, string):
-        return self.lexer(string)
+    def tokenize(self, source):
+
+        # Token definition of this lexer
+        Token = namedtuple('Token', ['type', 'data', 'lineno'])
+
+        lineno = 1
+        for m in self.re_all.finditer(source):
+            type_ = m.lastgroup
+            if type_ == 'SPACE':
+                continue
+            elif type_ == 'NEWLINE':
+                lineno += 1
+                continue
+            i, j = m.span()
+            data = m.string[i:j]
+            self.token_list.append(Token(type_, data, lineno))
+
+        return self.token_list
+
+lexer = Lexer()
+print(lexer.tokenize(input()))
