@@ -47,6 +47,3 @@ class Lexer:
             self.token_list.append(Token(type_, data, lineno))
 
         return self.token_list
-
-lexer = Lexer()
-print(lexer.tokenize(input()))
