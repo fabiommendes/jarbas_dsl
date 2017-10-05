@@ -6,7 +6,8 @@ class Lexer:
     def __init__(self):
 
         # Regex map to capture language tokens
-        self.regex_map = [('VARIABLE', r'\$[a-zA-Z]([a-zA-Z0-9_]*)'),
+        self.regex_map = [('NUMBER', r'[0-9]+'),
+                          ('VARIABLE', r'\$[a-zA-Z]([a-zA-Z0-9_]*)'),
                           ('ATTRIB', r'\.[a-zA-Z]([a-zA-Z0-9_]*)'),
                           ('PIPE', r'\|'),
                           ('COMMENT_MARKER', r'//'),
