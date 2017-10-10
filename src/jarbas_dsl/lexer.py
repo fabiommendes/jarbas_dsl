@@ -1,7 +1,22 @@
 import re
 from collections import namedtuple
 
+# Token definition of this lexer
+class Token(namedtuple('Token', ['type', 'data', 'lineno'])):
+    """
+    gyug ygytg ytg ytgy
+    """
+
+    def __eq__(self, other):
+        if isinstance(other, str):
+            return self.data == other
+        else:
+            return super().__eq__(other)
+
 class Lexer:
+    """
+    gyug ygytg ytg ytgy
+    """
 
     def __init__(self):
 
@@ -32,9 +47,6 @@ class Lexer:
     # Create a list of tokens based on lexer rules and text passed as string
     def tokenize(self, source):
 
-        # Token definition of this lexer
-        Token = namedtuple('Token', ['type', 'data', 'lineno'])
-
         lineno = 1
         for m in self.re_all.finditer(source):
             type_ = m.lastgroup
@@ -48,3 +60,8 @@ class Lexer:
             self.token_list.append(Token(type_, data, lineno))
 
         return self.token_list
+
+
+def tokenize(source):
+    lexer = Lexer()
+    return lexer.tokenize(source)
