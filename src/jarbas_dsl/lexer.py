@@ -25,9 +25,14 @@ class Lexer:
                           ('VARIABLE', r'\$[a-zA-Z]([a-zA-Z0-9_]*)'),
                           ('ATTRIB', r'\.[a-zA-Z]([a-zA-Z0-9_]*)'),
                           ('PIPE', r'\|'),
-                          ('COMMENT_MARKER', r'//'),
+                          ('COMMENT', r'//.*'),
                           ('PARENTHESES_O', r'\('),
                           ('PARENTHESES_C', r'\)'),
+                          ('BRACKET_O', r'\['),
+                          ('BRACKET_C', r']'),
+                          ('EQUAL', r'='),
+                          ('AMPER', r'&'),
+                          ('AT', r'@'),
                           ('NEWLINE', r'\n'),
                           ('SPACE', r'\s+')]
 
@@ -43,9 +48,11 @@ class Lexer:
         self.re_all = re.compile(self.REGEX_ALL)
         self.token_list = []
 
-    # Create a list of tokens based on lexer rules and text passed as string
-    def tokenize(self, source):
 
+    def tokenize(self, source):
+        """
+        Create a list of tokens based on lexer rules and text passed as string
+        """
         lineno = 1
         last = 0
         for m in self.re_all.finditer(source):
@@ -57,13 +64,15 @@ class Lexer:
                 continue
             i, j = m.span()
             if i > last:
+                # it means that there is text between last match and this one
                 yield Token('TEXT', source[last:i], lineno)
             last = j
             data = m.string[i:j]
             yield Token(type_, data, lineno)
-            #self.token_list.append(Token(type_, data, lineno))
 
-        #return self.token_list
+        if last != len(source):
+            yield Token('TEXT', source[last:len(source)], lineno)
+
 
 
 def tokenize(source):
