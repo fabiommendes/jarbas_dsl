@@ -29,8 +29,7 @@ class Lexer:
                           ('PARENTHESES_O', r'\('),
                           ('PARENTHESES_C', r'\)'),
                           ('NEWLINE', r'\n'),
-                          ('SPACE', r'\s+'),
-                          ('TEXT', r'\s*.+\s+')]
+                          ('SPACE', r'\s+')]
 
         # Template used to map a regex to a name
         self.template = r'(?P<{name}>{regex})'
@@ -48,6 +47,7 @@ class Lexer:
     def tokenize(self, source):
 
         lineno = 1
+        last = 0
         for m in self.re_all.finditer(source):
             type_ = m.lastgroup
             if type_ == 'SPACE':
@@ -56,12 +56,17 @@ class Lexer:
                 lineno += 1
                 continue
             i, j = m.span()
+            if i > last:
+                yield Token('TEXT', source[last:i], lineno)
+            last = j
             data = m.string[i:j]
-            self.token_list.append(Token(type_, data, lineno))
+            yield Token(type_, data, lineno)
+            #self.token_list.append(Token(type_, data, lineno))
 
-        return self.token_list
+        #return self.token_list
 
 
 def tokenize(source):
     lexer = Lexer()
-    return lexer.tokenize(source)
+    l = list(lexer.tokenize(source))
+    return l
