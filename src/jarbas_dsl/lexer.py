@@ -35,7 +35,8 @@ class Lexer:
                           ('AT', r'@'),
                           ('NEWLINE', r'\n'),
                           ('SPACE', r'\s+'),
-                          ('CONDITIONAL_IF', r'[if]+\s\$[a-zA-Z]+')]
+                          ('CONDITIONAL_IF', r'[if]+\s\$[a-zA-Z]+'),
+                          ('CONDITIONAL_ELSE', r'[else]+\$\n')]
 
         # Template used to map a regex to a name
         self.template = r'(?P<{name}>{regex})'

@@ -27,3 +27,8 @@ def test_lexer_if_calling():
     string = "=if $condition"
     expected = ["=", "if $condition"]
     test_lexer(string,expected)
+
+def test_lexer_else_calling():
+    string = "=else \n"
+    expected = ["=", "else \n"]
+    test_lexer(string,expected)
