@@ -21,3 +21,9 @@ def test_lexer_multiple_lines():
     expected = ["Name: ", "[", "name","]", " ", "//comment here", "\n Hello ",
                 "$name", ".title", "(", ")", "!"]
     test_lexer(string,expected)
+
+
+def test_lexer_if_calling():
+    string = "=if $condition"
+    expected = ["=", "if $condition"]
+    test_lexer(string,expected)
