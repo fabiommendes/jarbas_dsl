@@ -21,19 +21,21 @@ class Lexer:
         self.regex_map = [('NUMBER', r'[0-9]+'),
                           ('VARIABLE', r'\$[a-zA-Z]([a-zA-Z0-9_]*)'),
                           ('ATTRIB', r'\.[a-zA-Z]([a-zA-Z0-9_]*)'),
-                          ('PIPE', r'\|'),
+                          ('PIPE_FILTER', r'\|[a-zA-Z]([a-zA-Z0-9_]*)'),
                           ('COMMENT', r'//.*'),
                           ('PARENTHESES_O', r'\('),
                           ('PARENTHESES_C', r'\)'),
                           ('BRACKET_O', r'\['),
-                          ('BRACKET_C', r']'),
+                          ('BRACKET_C', r'\]'),
+                          ('CONDITIONAL_IF', r'=if +'),
+                          ('CONDITIONAL_ELIF', r'=elif +'),
+                          ('CONDITIONAL_ELSE', r'=else\n+'),
+                          ('END_CONDITIONAL', r'=endif+'),
                           ('EQUAL', r'='),
                           ('AMPER', r'&'),
                           ('AT', r'@'),
                           ('NEWLINE', r'\n'),
-                          ('SPACE', r'\s+'),
-                          ('CONDITIONAL_IF', r'[if]+\s\$[a-zA-Z]+'),
-                          ('CONDITIONAL_ELSE', r'[else]+\$\n')]
+                          ('SPACE', r'\s+')]
 
         # Template used to map a regex to a name
         self.template = r'(?P<{name}>{regex})'
