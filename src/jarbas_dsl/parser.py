@@ -1,6 +1,32 @@
 import ox
-from lexer import tokenize
+from lexer import tokenize, token_list
 from collections import namedtuple
+
+
+Var = namedtuple('Var', 'id')
+Attr = namedtuple('Attr', 'id')
+Expr = namedtuple('Expr', 'variable attrib')
+
+def number(token):
+    return float(token)
+
+def variable(token):
+    return Var(id=token.replace('$', ''))
+
+def attribute(token):
+    return Attr(id=token.replace('.', ''))
+
+def expr_attrib(v, a):
+    return Expr(variable=v, attrib=a)
+
+parser_rules = [
+    ('expr : var attr', expr_attrib),
+    ('attr : ATTRIB', attribute),
+    ('var  : VARIABLE', variable),
+    ('atom : NUMBER', number),
+]
+
+parser = ox.make_parser(parser_rules, token_list)
 
 class Parser:
     """
@@ -8,27 +34,6 @@ class Parser:
     
     It creates an AST object which is returned by the Parser.parse() method.
     """
-    def number(token):
-        return float(token.data)
-
-    def variable(token):
-        Var = namedtuple('Var', 'id')
-        return Var(id=token.data.replace('$', ''))
-
-    def attribute(token):
-        Attr = namedtuple('Atrr', 'id')
-        return Attr(id=token.data.replace('.', ''))
-
-    def expr_attrib(v, a):
-        Expr = namedtuple('Expr', 'variable attrib')
-        return Expr(variable=v, attrib=a)
-
-    parser_rules = [
-        ('expr : var attr', expr_attrib),
-        ('attr : ATTRIB', attribute),
-        ('var  : VARIABLE', variable),
-        ('atom : NUMBER', number),
-    ]
 
     def __init__(self, source):
         self.source = source
@@ -39,14 +44,14 @@ class Parser:
         """
         Parse input source code and return a Jarbas DSL AST.
         """
-        return ox.make_parser(self.parser_rules, self.tokens)
-        #raise NotImplementedError
+        return parser(self.tokens)
 
     def test(self):
         return self.tokens
 
 s = '$person.name'
 p = Parser(s)
+#print(tokenize(s))
 #a = p.test()
 #print(a)
 #print(a[1])

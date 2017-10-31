@@ -1,16 +1,69 @@
 import re
 from collections import namedtuple
+from ox import Token
 
 
-class Token(namedtuple('Token', ['type', 'data', 'lineno'])):
+class _Token(namedtuple('Token', ['type', 'data', 'lineno'])):
     """
     Token definition used by jarbas_dsl lexer
     """
+
+    lexpos = None
+    lexer = None
+
+    @property
+    def value(self):
+        return self.data
+
+    def __new__(self, type, data, lineno):
+        print(type, data, lineno)
+        hash((type, data, lineno))
+        return super().__new__(self, type, data, lineno)
+
+    def __hash__(self):
+        return hash((self.type, self.data, self.lineno))
+
     def __eq__(self, other):
         if isinstance(other, str):
             return self.data == other
         else:
             return super().__eq__(other)
+
+class Token(Token):
+    def __gt__(self, other):
+        if isinstance(other, Token):
+            return self.value > other.value
+        elif isinstance(other, str):
+            return self.value > other
+        return NotImplemented
+
+    def __lt__(self, other):
+        if isinstance(other, Token):
+            return self.value < other.value
+        elif isinstance(other, str):
+            return self.value < other
+        return NotImplemented
+
+regex_map = [('NUMBER', r'[0-9]+'),
+                    ('VARIABLE', r'\$[a-zA-Z]([a-zA-Z0-9_]*)'),
+                    ('ATTRIB', r'\.[a-zA-Z]([a-zA-Z0-9_]*)'),
+                    ('PIPE_FILTER', r'\|[a-zA-Z]([a-zA-Z0-9_]*)'),
+                    ('COMMENT', r'//.*'),
+                    ('PARENTHESES_O', r'\('),
+                    ('PARENTHESES_C', r'\)'),
+                    ('BRACKET_O', r'\['),
+                    ('BRACKET_C', r'\]'),
+                    ('CONDITIONAL_IF', r'=if +'),
+                    ('CONDITIONAL_ELIF', r'=elif +'),
+                    ('CONDITIONAL_ELSE', r'=else\n+'),
+                    ('END_CONDITIONAL', r'=endif+'),
+                    ('EQUAL', r'='),
+                    ('AMPER', r'&'),
+                    ('AT', r'@'),
+                    ('NEWLINE', r'\n'),
+                    ('SPACE', r'\s+')]
+
+token_list = [x for x, y in regex_map]
 
 class Lexer:
     """
@@ -18,24 +71,6 @@ class Lexer:
     """
     def __init__(self):
         # Regex map to capture language tokens
-        self.regex_map = [('NUMBER', r'[0-9]+'),
-                          ('VARIABLE', r'\$[a-zA-Z]([a-zA-Z0-9_]*)'),
-                          ('ATTRIB', r'\.[a-zA-Z]([a-zA-Z0-9_]*)'),
-                          ('PIPE_FILTER', r'\|[a-zA-Z]([a-zA-Z0-9_]*)'),
-                          ('COMMENT', r'//.*'),
-                          ('PARENTHESES_O', r'\('),
-                          ('PARENTHESES_C', r'\)'),
-                          ('BRACKET_O', r'\['),
-                          ('BRACKET_C', r'\]'),
-                          ('CONDITIONAL_IF', r'=if +'),
-                          ('CONDITIONAL_ELIF', r'=elif +'),
-                          ('CONDITIONAL_ELSE', r'=else\n+'),
-                          ('END_CONDITIONAL', r'=endif+'),
-                          ('EQUAL', r'='),
-                          ('AMPER', r'&'),
-                          ('AT', r'@'),
-                          ('NEWLINE', r'\n'),
-                          ('SPACE', r'\s+')]
 
         # Template used to map a regex to a name
         self.template = r'(?P<{name}>{regex})'
@@ -43,7 +78,7 @@ class Lexer:
         # Creating a big regex for all jarbas_dsl tokens
         self.REGEX_ALL = '|'.join(
             self.template.format(name=name, regex=regex)
-            for (name, regex) in self.regex_map
+            for (name, regex) in regex_map
         )
 
         self.re_all = re.compile(self.REGEX_ALL)
