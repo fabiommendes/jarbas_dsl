@@ -1,11 +1,12 @@
 import ox
-from lexer import tokenize, token_list
+from lexer import tokenize, valid_tokens
 from collections import namedtuple
 
 
 Var = namedtuple('Var', 'id')
 Attr = namedtuple('Attr', 'id')
-Expr = namedtuple('Expr', 'variable attrib')
+Method = namedtuple('Method', 'id params')
+Expr = namedtuple('Expr', 'args')
 
 def number(token):
     return float(token)
@@ -16,29 +17,41 @@ def variable(token):
 def attribute(token):
     return Attr(id=token.replace('.', ''))
 
+def method_params(a, po, params, pc):
+    return Method(a.replace('.', ''), params)
+
+def method_noparams(a, po, pc):
+    return Method(a.replace('.', ''), None)
+
+
 def expr_attrib(v, a):
-    return Expr(variable=v, attrib=a)
+    return Expr((v, a))
+
+def expr_method(e, m):
+    return Expr((e, m))
 
 parser_rules = [
-    ('expr : var attr', expr_attrib),
+    ('expr : expr method', expr_method),
+    ('expr : expr attr', expr_attrib),
+    ('expr : var', lambda x: x),
+    ('method : ATTRIB PAREN_O num PAREN_C', method_params),
+    ('method : ATTRIB PAREN_O PAREN_C', method_noparams),
     ('attr : ATTRIB', attribute),
     ('var  : VARIABLE', variable),
-    ('atom : NUMBER', number),
+    ('num : NUMBER', number),
 ]
 
-parser = ox.make_parser(parser_rules, token_list)
+parser = ox.make_parser(parser_rules, valid_tokens)
 
 class Parser:
     """
     Parse a string of Jarbas DSL code. 
-    
     It creates an AST object which is returned by the Parser.parse() method.
     """
 
     def __init__(self, source):
         self.source = source
         self.tokens = tokenize(source)
-        print(type(self.tokens[0]))
 
     def parse(self):
         """
@@ -46,12 +59,8 @@ class Parser:
         """
         return parser(self.tokens)
 
-    def test(self):
-        return self.tokens
-
-s = '$person.name'
+s = '$person.title()'
 p = Parser(s)
-#print(tokenize(s))
 #a = p.test()
 #print(a)
 #print(a[1])

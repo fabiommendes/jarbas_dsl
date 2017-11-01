@@ -18,8 +18,8 @@ regex_map = [('NUMBER', r'[0-9]+'),
             ('ATTRIB', r'\.[a-zA-Z]([a-zA-Z0-9_]*)'),
             ('PIPE_FILTER', r'\|[a-zA-Z]([a-zA-Z0-9_]*)'),
             ('COMMENT', r'//.*'),
-            ('PARENTHESES_O', r'\('),
-            ('PARENTHESES_C', r'\)'),
+            ('PAREN_O', r'\('),
+            ('PAREN_C', r'\)'),
             ('BRACKET_O', r'\['),
             ('BRACKET_C', r'\]'),
             ('CONDITIONAL_IF', r'=if +'),
@@ -35,6 +35,7 @@ regex_map = [('NUMBER', r'[0-9]+'),
 # The parser used by jarbas_dsl need
 # a list with all names of valid tokens
 valid_tokens = [x for x, y in regex_map]
+#valid_tokens.append('TEXT')
 
 template = r'(?P<{name}>{regex})'
 
@@ -47,6 +48,7 @@ REGEX_ALL = '|'.join(
 )
 
 re_all = re.compile(REGEX_ALL)
+
 
 def tokenize(source):
     """
@@ -74,6 +76,7 @@ def tokenize(source):
         token_list.append(Token('TEXT', source[last:len(source)], lineno))
 
     return token_list
+
 
 class Token(ox_token):
     """
