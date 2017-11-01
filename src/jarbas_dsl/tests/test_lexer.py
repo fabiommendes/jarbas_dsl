@@ -2,10 +2,14 @@ import pytest
 import jarbas_dsl
 from jarbas_dsl.lexer import tokenize
 
+
 @pytest.fixture
 def test_lexer(string,expected):
-    tokenized_source = tokenize(string)
-    assert tokenized_source == expected
+    tokenized_source_list = tokenize(string)
+    token_values_list = []
+    for token in tokenized_source_list:
+        token_values_list.append(token.value)
+    assert token_values_list == expected
 
 
 # Tests of dollar sign small transformations and comments
