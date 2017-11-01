@@ -3,7 +3,16 @@ from collections import namedtuple
 from ox import Token as ox_token
 
 
-# Regex map to capture language tokens
+"""
+The jarbas_dsl lexer is used to process
+an entry string of code by classifying
+each "word" into a language token
+"""
+
+
+# This regex map is necessary to capture all valid
+# tokens on a given string and also could be called
+# the language alphabet 
 regex_map = [('NUMBER', r'[0-9]+'),
             ('VARIABLE', r'\$[a-zA-Z]([a-zA-Z0-9_]*)'),
             ('ATTRIB', r'\.[a-zA-Z]([a-zA-Z0-9_]*)'),
@@ -23,11 +32,15 @@ regex_map = [('NUMBER', r'[0-9]+'),
             ('NEWLINE', r'\n'),
             ('SPACE', r'\s+')]
 
+# The parser used by jarbas_dsl need
+# a list with all names of valid tokens
 valid_tokens = [x for x, y in regex_map]
 
 template = r'(?P<{name}>{regex})'
 
-# Creating a big regex for all jarbas_dsl tokens
+# This is used to create a big regex with all
+# regex in regex_map to avoid compile one regex
+# at a time
 REGEX_ALL = '|'.join(
     template.format(name=name, regex=regex)
     for (name, regex) in regex_map
