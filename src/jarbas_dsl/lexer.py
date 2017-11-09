@@ -13,7 +13,9 @@ each "word" into a language token
 # This regex map is necessary to capture all valid
 # tokens on a given string and also could be called
 # the language alphabet 
-regex_map = [('NUMBER', r'[0-9]+'),
+regex_map = [('NUMBER', r'([0-9]+\.[0-9]+)|([0-9]+)'),
+            ('STRING', r'\'.*\''),
+            ('BOOLEAN', r'True|False'),
             ('VARIABLE', r'\$[a-zA-Z]([a-zA-Z0-9_]*)'),
             ('ATTRIB', r'\.[a-zA-Z]([a-zA-Z0-9_]*)'),
             ('PIPE_FILTER', r'\|[a-zA-Z]([a-zA-Z0-9_]*)'),
@@ -35,7 +37,7 @@ regex_map = [('NUMBER', r'[0-9]+'),
 # The parser used by jarbas_dsl need
 # a list with all names of valid tokens
 valid_tokens = [x for x, y in regex_map]
-#valid_tokens.append('TEXT')
+valid_tokens.append('TEXT')
 
 template = r'(?P<{name}>{regex})'
 
@@ -96,3 +98,4 @@ class Token(ox_token):
         elif isinstance(other, str):
             return self.value < other
         return NotImplemented
+        
