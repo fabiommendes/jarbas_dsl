@@ -98,4 +98,3 @@ class Token(ox_token):
         elif isinstance(other, str):
             return self.value < other
         return NotImplemented
-        
