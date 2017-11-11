@@ -7,12 +7,13 @@ from collections import namedtuple
 Var = namedtuple('Var', 'id')
 Attr = namedtuple('Attr', 'id')
 Method = namedtuple('Method', 'id args')
+Filter = namedtuple('Filter', 'id')
 Expr = namedtuple('Expr', 'components')
 Text = namedtuple('Text', 'value')
 Num = namedtuple('Num', 'value')
 Bool = namedtuple('Bool', 'value')
 Str = namedtuple('Str', 'value')
-
+Comment = namedtuple('Comment', 'value')
 
 # Arguments of a method must be separated
 # by a single comma in the format "method(arg1,arg2)"
@@ -30,13 +31,16 @@ parser_rules = [
     ('access : ATTRIB PAREN_O args PAREN_C', lambda m, p_o, a, p_c : Method(m.replace('.', ''), a)),
     ('access : ATTRIB', lambda token : Attr(id=token.replace('.', ''))),
     ('access : VARIABLE', lambda token : Var(id=token.replace('$', ''))),
+    ('access : PIPE_FILTER', lambda token : Filter(id=token.replace('|', ''))),
     ('args : arg TEXT args', multi_arg),
     ('args : arg', lambda token : token),
     ('expr : text', lambda x: x),
+    ('expr : comment', lambda x: x),
     ('arg : NUMBER', lambda token : Num(value=token)),
     ('arg : BOOLEAN', lambda token : Bool(value=token)),
     ('arg : STRING', lambda token : Str(value=token.replace("'", ''))),
     ('text : TEXT', lambda token : Text(value=token)),
+    ('comment : COMMENT', lambda token: Comment(value=token)),
 ]
 
 parser = ox.make_parser(parser_rules, valid_tokens)
@@ -57,7 +61,7 @@ class Parser:
         """
         return parser(self.tokens)
 
-s = "Hello $person.title(True,2)"
+s = "Hello $person|title! //alou"
 #s = "."
 p = Parser(s)
 #a = p.test()
