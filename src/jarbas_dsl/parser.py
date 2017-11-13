@@ -6,8 +6,8 @@ from collections import namedtuple
 
 Var = namedtuple('Var', 'id')
 Func = namedtuple('Func', 'id args')
-Attr = namedtuple('Attr', 'id belong_to')
-Method = namedtuple('Method', 'id args')
+Attr = namedtuple('Attr', 'id belongs_to')
+Method = namedtuple('Method', 'id belongs_to args')
 Filter = namedtuple('Filter', 'id')
 Expr = namedtuple('Expr', 'components')
 Text = namedtuple('Text', 'value')
@@ -56,11 +56,11 @@ def args_func(id, p_o, args, p_c):
     return Func(id.replace('$', ''), args)
 
 # Methods
-def no_args_method(id, p_o, p_c):
-    return Func(id.replace('.', ''), None)
+def no_args_method(var, method, p_o, p_c):
+    return Method(method.replace('.', ''), var.replace('$', ''), None)
 
-def args_method(id, p_o, args, p_c):
-    return Func(id.replace('.', ''), args)
+def args_method(var, method, p_o, args, p_c):
+    return Method(method.replace('.', ''), var.replace('$', ''), args)
     
 # Filter
 def filter(id):
@@ -69,8 +69,8 @@ def filter(id):
 parser_rules = [
     ('expr : expr expr', lambda x,y : Expr(components=[x, y])),
     ('expr : utility', lambda x: x),
-    ('utility : ATTRIB PAREN_O PAREN_C', no_args_method),
-    ('utility : ATTRIB PAREN_O args PAREN_C', args_method),
+    ('utility : VARIABLE ATTRIB PAREN_O PAREN_C', no_args_method),
+    ('utility : VARIABLE ATTRIB PAREN_O args PAREN_C', args_method),
     ('utility : VARIABLE PAREN_O PAREN_C', no_args_func),
     ('utility : VARIABLE PAREN_O args PAREN_C', args_func),
     ('utility : VARIABLE ATTRIB', attribute),
@@ -112,8 +112,7 @@ class Parser:
         """
         return parser(self.tokens)
 
-s = "$is_minor($age.name)"
-#s = "=if $is_minor($age)"
+s = "$m.is_minor($person.age, True)"
 p = Parser(s)
 #a = p.test()
 #print(a)
