@@ -24,31 +24,26 @@ Input = namedtuple('Input', 'save_in type default validate_func')
 # in a method with args = None
 def multi_arg(arg1, text, arg2):
     if text.replace(' ', '') == ',':
-        return [arg1, arg2]
-
-
-def remove_dollar(s):
-    return s.replace('$', '')
+        return [arg1] + arg2
 
 
 # Input
-def normal_input(b_o, s, b_c):
-    return Input(save_in=remove_dollar(s),
+def normal_input(bracket_open, variable, bracket_close):
+    return Input(save_in=variable,
                  type=None, default=None, validate_func=None)
 
-
-def type_input(b_o, s, eq, t, b_c):
-    return Input(save_in=remove_dollar(s),
+def type_input(bracket_open, variable, eq, t, bracket_close):
+    return Input(save_in=variable,
                  type=t, default=None, validate_func=None)
 
 
-def default_input(b_o, s, at, d, b_c):
-    return Input(save_in=remove_dollar(s),
+def default_input(bracket_open, variable, at, d, bracket_close):
+    return Input(save_in=variable,
                  type=None, default=d, validate_func=None)
 
 
-def validated_input(b_o, s, ap, f, b_c):
-    return Input(save_in=remove_dollar(s),
+def validated_input(bracket_open, variable, ap, f, bracket_close):
+    return Input(save_in=variable,
                  type=None, default=None, validate_func=f)
 
 
@@ -56,48 +51,55 @@ def validated_input(b_o, s, ap, f, b_c):
 def variable(id):
     return Var(id.replace('$', ''))
 
+
 # Attributes
 def attribute(var, attr):
-    return Attr(attr.replace('.', ''), var.replace('$', ''))
+    return Attr(id=attr.replace('.', ''), belongs_to=var)
+
 
 # Functions
 def no_args_func(id, p_o, p_c):
-    return Func(id.replace('$', ''), None)
+    return Func(id, None)
+
 
 def args_func(id, p_o, args, p_c):
-    return Func(id.replace('$', ''), args)
+    return Func(id, args)
+
 
 # Methods
 def no_args_method(var, method, p_o, p_c):
-    return Method(method.replace('.', ''), var.replace('$', ''), None)
+    return Method(method.replace('.', ''), var, None)
+
 
 def args_method(var, method, p_o, args, p_c):
-    return Method(method.replace('.', ''), var.replace('$', ''), args)
+    return Method(method.replace('.', ''), var, args)
+
 
 # Filter
 def filter(id):
     return Filter(id.replace('|', ''))
 
+
 parser_rules = [
     ('expr : expr expr', lambda x, y: Expr(components=[x, y])),
     ('expr : utility', lambda x: x),
-    ('utility : VARIABLE ATTRIB PAREN_O PAREN_C', no_args_method),
-    ('utility : VARIABLE ATTRIB PAREN_O args PAREN_C', args_method),
-    ('utility : VARIABLE PAREN_O PAREN_C', no_args_func),
-    ('utility : VARIABLE PAREN_O args PAREN_C', args_func),
-    ('utility : VARIABLE ATTRIB', attribute),
-    ('utility : VARIABLE', variable),
+    ('utility : variable ATTRIB PAREN_O PAREN_C', no_args_method),
+    ('utility : variable ATTRIB PAREN_O args PAREN_C', args_method),
+    ('utility : variable PAREN_O PAREN_C', no_args_func),
+    ('utility : variable PAREN_O args PAREN_C', args_func),
+    ('utility : variable', lambda x: x),
     ('utility : PIPE_FILTER', filter),
-    ('utility : BRACKET_O VARIABLE BRACKET_C', normal_input),
-    ('utility : BRACKET_O VARIABLE EQUAL TEXT BRACKET_C', type_input),
-    ('utility : BRACKET_O VARIABLE AT TEXT BRACKET_C', default_input),
-    ('utility : BRACKET_O VARIABLE AMPER TEXT BRACKET_C', validated_input),
+    ('utility : BRACKET_O variable BRACKET_C', normal_input),
+    ('utility : BRACKET_O variable EQUAL TEXT BRACKET_C', type_input),
+    ('utility : BRACKET_O variable AT TEXT BRACKET_C', default_input),
+    ('utility : BRACKET_O variable AMPER TEXT BRACKET_C', validated_input),
     ('args : arg TEXT args', multi_arg),
-    ('args : arg', lambda token: token),
+    ('args : arg', lambda token: [token]),
     ('expr : text', lambda x: x),
     ('expr : comment', lambda x: x),
-    ('arg : VARIABLE', variable),
-    ('arg : VARIABLE ATTRIB', attribute),
+    ('variable : variable ATTRIB', attribute),
+    ('variable : VARIABLE', variable),
+    ('arg : variable', lambda x: x),
     ('arg : NUMBER', lambda token: Num(value=token)),
     ('arg : BOOLEAN', lambda token: Bool(value=token)),
     ('arg : STRING', lambda token: Str(value=token.replace("'", ''))),
@@ -126,8 +128,8 @@ class Parser(object):
         return parser(self.tokens)
 
 
-s = "$m.is_minor($person.age, True)"
-p = Parser(s)
+var_name = "$m.is_minor($person.age, True)"
+p = Parser(var_name)
 #a = p.test()
 #print(a)
 #print(a[1])
