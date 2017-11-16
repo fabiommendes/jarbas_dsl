@@ -26,18 +26,30 @@ def multi_arg(arg1, text, arg2):
     if text.replace(' ', '') == ',':
         return [arg1, arg2]
 
+
+def remove_dollar(s):
+    return s.replace('$', '')
+
+
 # Input
 def normal_input(b_o, s, b_c):
-    return Input(save_in=s, type=None, default=None, validate_func=None)
+    return Input(save_in=remove_dollar(s),
+                 type=None, default=None, validate_func=None)
+
 
 def type_input(b_o, s, eq, t, b_c):
-    return Input(save_in=s, type=t, default=None, validate_func=None)
+    return Input(save_in=remove_dollar(s),
+                 type=t, default=None, validate_func=None)
 
-def default_input(b_o, s, eq, at, d, b_c):
-    return Input(save_in=s, type=None, default=d, validate_func=None)
 
-def validated_input(b_o, s, eq, ap, f, b_c):
-    return Input(save_in=s, type=None, default=None, validate_func=f)
+def default_input(b_o, s, at, d, b_c):
+    return Input(save_in=remove_dollar(s),
+                 type=None, default=d, validate_func=None)
+
+
+def validated_input(b_o, s, ap, f, b_c):
+    return Input(save_in=remove_dollar(s),
+                 type=None, default=None, validate_func=f)
 
 
 # Variables
@@ -76,10 +88,10 @@ parser_rules = [
     ('utility : VARIABLE ATTRIB', attribute),
     ('utility : VARIABLE', variable),
     ('utility : PIPE_FILTER', filter),
-    ('utility : BRACKET_O TEXT BRACKET_C', normal_input),
-    ('utility : BRACKET_O TEXT EQUAL TEXT BRACKET_C', type_input),
-    ('utility : BRACKET_O TEXT EQUAL AT TEXT BRACKET_C', default_input),
-    ('utility : BRACKET_O TEXT EQUAL AMPER TEXT BRACKET_C', validated_input),
+    ('utility : BRACKET_O VARIABLE BRACKET_C', normal_input),
+    ('utility : BRACKET_O VARIABLE EQUAL TEXT BRACKET_C', type_input),
+    ('utility : BRACKET_O VARIABLE AT TEXT BRACKET_C', default_input),
+    ('utility : BRACKET_O VARIABLE AMPER TEXT BRACKET_C', validated_input),
     ('args : arg TEXT args', multi_arg),
     ('args : arg', lambda token: token),
     ('expr : text', lambda x: x),
