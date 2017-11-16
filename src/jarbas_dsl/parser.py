@@ -17,14 +17,14 @@ Str = namedtuple('Str', 'value')
 Comment = namedtuple('Comment', 'value')
 Input = namedtuple('Input', 'save_in type default validate_func')
 
+
 # Arguments of a method must be separated
 # by a single comma in the format "method(arg1,arg2)"
 # or "method(arg1, arg2)", any other format will result
 # in a method with args = None
 def multi_arg(arg1, text, arg2):
-    if text == ', ' or text == ',':
-        args = [arg1, arg2]
-        return args
+    if text.replace(' ', '') == ',':
+        return [arg1, arg2]
 
 # Input
 def normal_input(b_o, s, b_c):
@@ -61,13 +61,13 @@ def no_args_method(var, method, p_o, p_c):
 
 def args_method(var, method, p_o, args, p_c):
     return Method(method.replace('.', ''), var.replace('$', ''), args)
-    
+
 # Filter
 def filter(id):
     return Filter(id.replace('|', ''))
 
 parser_rules = [
-    ('expr : expr expr', lambda x,y : Expr(components=[x, y])),
+    ('expr : expr expr', lambda x, y: Expr(components=[x, y])),
     ('expr : utility', lambda x: x),
     ('utility : VARIABLE ATTRIB PAREN_O PAREN_C', no_args_method),
     ('utility : VARIABLE ATTRIB PAREN_O args PAREN_C', args_method),
@@ -81,23 +81,24 @@ parser_rules = [
     ('utility : BRACKET_O TEXT EQUAL AT TEXT BRACKET_C', default_input),
     ('utility : BRACKET_O TEXT EQUAL AMPER TEXT BRACKET_C', validated_input),
     ('args : arg TEXT args', multi_arg),
-    ('args : arg', lambda token : token),
+    ('args : arg', lambda token: token),
     ('expr : text', lambda x: x),
     ('expr : comment', lambda x: x),
     ('arg : VARIABLE', variable),
     ('arg : VARIABLE ATTRIB', attribute),
-    ('arg : NUMBER', lambda token : Num(value=token)),
-    ('arg : BOOLEAN', lambda token : Bool(value=token)),
-    ('arg : STRING', lambda token : Str(value=token.replace("'", ''))),
-    ('text : TEXT', lambda token : Text(value=token)),
+    ('arg : NUMBER', lambda token: Num(value=token)),
+    ('arg : BOOLEAN', lambda token: Bool(value=token)),
+    ('arg : STRING', lambda token: Str(value=token.replace("'", ''))),
+    ('text : TEXT', lambda token: Text(value=token)),
     ('comment : COMMENT', lambda token: Comment(value=token)),
 ]
 
 parser = ox.make_parser(parser_rules, valid_tokens)
 
-class Parser:
+
+class Parser(object):
     """
-    Parse a string of Jarbas DSL code. 
+    Parse a string of Jarbas DSL code.
     It creates an AST object which is returned by the Parser.parse() method.
     """
 
@@ -111,6 +112,7 @@ class Parser:
         Parse input source code and return a Jarbas DSL AST.
         """
         return parser(self.tokens)
+
 
 s = "$m.is_minor($person.age, True)"
 p = Parser(s)
