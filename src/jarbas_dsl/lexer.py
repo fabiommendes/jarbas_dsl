@@ -12,7 +12,7 @@ each "word" into a language token
 
 # This regex map is necessary to capture all valid
 # tokens on a given string and also could be called
-# the language alphabet 
+# the language alphabet
 regex_map = [('NUMBER', r'([0-9]+\.[0-9]+)|([0-9]+)'),
             ('STRING', r'\'.*\''),
             ('BOOLEAN', r'True|False'),
@@ -28,9 +28,9 @@ regex_map = [('NUMBER', r'([0-9]+\.[0-9]+)|([0-9]+)'),
             ('CONDITIONAL_ELIF', r'=elif +'),
             ('CONDITIONAL_ELSE', r'=else\n+'),
             ('END_CONDITIONAL', r'=endif+'),
+            ('AMPER', r'=&'),
+            ('AT', r'=@'),
             ('EQUAL', r'='),
-            ('AMPER', r'&'),
-            ('AT', r'@'),
             ('NEWLINE', r'\n'),
             ('SPACE', r'\s+')]
 

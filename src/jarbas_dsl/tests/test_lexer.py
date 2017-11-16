@@ -47,12 +47,12 @@ def test_defined_type_user_input():
 
 def test_function_validation_user_input():
     string = "Name: [email=&email] Hello $name!"
-    expected = ["Name: ", "[", "email", "=", "&", "email", "]", " Hello ", "$name", "!"]  
+    expected = ["Name: ", "[", "email", "=&", "email", "]", " Hello ", "$name", "!"]
     test_lexer(string, expected)
 
 def test_default_value_user_input():
     string = "Name: [github=@email] Hello $name!"
-    expected = ["Name: ", "[", "github", "=", "@", "email", "]", " Hello ", "$name", "!"]  
+    expected = ["Name: ", "[", "github", "=@", "email", "]", " Hello ", "$name", "!"]
     test_lexer(string, expected)
 
 
