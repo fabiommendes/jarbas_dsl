@@ -14,8 +14,13 @@ Tests for Inputs
 =================================
 """
 
+def test_simple_input():
+    string = "[$name]"
+    expected = "Input(save_in=Var(id='name'), type=None, default=None, validate_func=None)"
 
-def test_input_without_default():
+    assert test_parser(string) == expected
+
+def test_input_for_attribute():
     string = "Github: [$person.user]"
     expected = "Expr(components=[Text(value='Github: '), Input(save_in=Attr(id='user', belongs_to=Var(id='person')), type=None, default=None, validate_func=None)])"
 
@@ -58,6 +63,18 @@ def test_string_without_function():
     except(SyntaxError):
         assert True
 
+def test_text_with_double_quotes():
+    string = '"some quote"'
+
+    expected = "Text(value='\"some quote\"')"
+    assert test_parser(string) == expected
+
+def test_text_with_string():
+    string = '"Hello" $print(\'New User!\')'
+
+    expected = "Expr(components=[Text(value='\"Hello\" '), Func(id='print', args=[Str(value='New User!')])])"
+    assert test_parser(string) == expected
+
 
 def test_chinese_text():
     string = ("振深面作果品選学我岐縦判裁見。出位改購覇野告公料愛芸生多提係属。" +
@@ -77,16 +94,24 @@ Tests for Functions and Methods parsing
 """
 
 
-def test_validate_func():
+def test_func_no_args():
+    string = "$validate_user()"
+    # Question: should this work?
+    expected = "Func(id='validate_user', args=None)"
+    assert test_parser(string) == expected
+
+
+def test_func_with_one_arg():
     string = "$validate_user($username)"
 
     expected = "Func(id='validate_user', args=[Var(id='username')])"
     assert test_parser(string) == expected
 
-def test_validate_func_without_param():
-    string = "$validate_user()"
-    # Question: should this work?
-    expected = "Func(id='validate_user', args=None)"
+
+def test_func_with_two_args():
+    string = "$validate_user($username, 'token')"
+
+    expected = "Func(id='validate_user', args=[Var(id='username'), Str(value='token')])"
     assert test_parser(string) == expected
 
 
