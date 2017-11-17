@@ -10,9 +10,37 @@ def test_parser(test_string):
 
 """
 =================================
-Tests for Inputs
+Tests for Inputs and Variables
 =================================
 """
+
+
+def test_variable():
+    string = "$name"
+    expected = "Var(id='name')"
+
+    assert test_parser(string) == expected
+
+def test_variable_attrib():
+    string = "$person.name"
+    expected = "Attr(id='name', belongs_to=Var(id='person'))"
+
+    assert test_parser(string) == expected
+
+
+def test_variable_filter():
+    string = "$name|title"
+    # Question: Can we solve this in Runner?
+    expected = "Expr(components=[Var(id='name'), Filter(id='title')])"
+    assert test_parser(string) == expected
+
+
+def test_attr_filter():
+    string = "$person.name|title"
+    # Question: Can we solve this in Runner?
+    expected = "Expr(components=[Attr(id='name', belongs_to=Var(id='person')), Filter(id='title')])"
+    assert test_parser(string) == expected
+
 
 def test_simple_input():
     string = "[$name]"
