@@ -58,12 +58,12 @@ def attribute(var, attr):
 
 
 # Functions
-def no_args_func(id, p_o, p_c):
-    return Func(id, None)
+def no_args_func(var, p_o, p_c):
+    return Func(var.id, None)
 
 
-def args_func(id, p_o, args, p_c):
-    return Func(id, args)
+def args_func(var, p_o, args, p_c):
+    return Func(var.id, args)
 
 
 # Methods

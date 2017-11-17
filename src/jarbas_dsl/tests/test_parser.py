@@ -42,6 +42,7 @@ def test_input_with_type():
 
     assert test_parser(string) == expected
 
+
 def test_string_without_function():
     string = "'振深面作果品選学我岐縦'"
     try:
@@ -60,5 +61,12 @@ def test_chinese_text():
 def test_string_with_function():
     string = "振深面作果品選学我$function('出位改購覇野提係属。経最康様気投無種警込。')広光階芸座発議球立度驚"
 
-    expected = "Expr(components=[Text(value='振深面作果品選学我'), Expr(components=[Func(id=Var(id='function'), args=[Str(value='出位改購覇野提係属。経最康様気投無種警込。')]), Text(value='広光階芸座発議球立度驚')])])"
+    expected = "Expr(components=[Text(value='振深面作果品選学我'), Expr(components=[Func(id='function', args=[Str(value='出位改購覇野提係属。経最康様気投無種警込。')]), Text(value='広光階芸座発議球立度驚')])])"
+    assert test_parser(string) == expected
+
+
+def test_validate_func():
+    string = "$validate_user($username)"
+
+    expected = "Func(id='validate_user', args=[Var(id='username')])"
     assert test_parser(string) == expected
