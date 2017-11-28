@@ -14,8 +14,9 @@ Text = namedtuple('Text', 'value')
 Num = namedtuple('Num', 'value')
 Bool = namedtuple('Bool', 'value')
 Str = namedtuple('Str', 'value')
-Comment = namedtuple('Comment', 'value')
 Input = namedtuple('Input', 'save_in type default validate_func')
+Conditional = namedtuple('Condtional', 'type condition')
+Comment = namedtuple('Comment', 'value')
 
 
 # Arguments of a method must be separated
@@ -128,7 +129,7 @@ class Parser(object):
         return parser(self.tokens)
 
 
-var_name = "$m.is_minor($person.age, True)"
+var_name = "Hello $m.is_minor($person.age, True)"
 p = Parser(var_name)
 #a = p.test()
 #print(a)
