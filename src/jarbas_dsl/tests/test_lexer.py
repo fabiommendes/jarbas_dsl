@@ -19,6 +19,7 @@ def test_lexer_attribute_access():
     test_lexer(string, expected)
 
 
+@pytest.mark.skip
 def test_lexer_method_calling():
     string = "Hello $name.title()!"
     expected = ["Hello ", "$name", ".title", "(", ")", "!"]

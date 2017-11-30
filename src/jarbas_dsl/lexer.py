@@ -21,22 +21,20 @@ regex_pairs = [
     ('OUTPUT_VAR', r'\$[a-zA-Z][a-zA-Z0-9_]*'),
     ('OUTPUT_ATTR', r'\.[a-zA-Z][a-zA-Z0-9_]*'),
     ('NAME', r'[a-zA-Z][a-zA-Z0-9_]*'),
-    ('ATTRIB', r'\.[a-zA-Z]([a-zA-Z0-9_]*)'),
-    ('PIPE_FILTER', r'\|[a-zA-Z]([a-zA-Z0-9_]*)'),
-    ('COMMENT', r'//.*'),
+    ('PIPE_FILTER', r'\|'),
     ('PAREN_O', r'\('),
     ('PAREN_C', r'\)'),
-    ('BRACKET_O', r'\['),
-    ('BRACKET_C', r'\]'),
-    ('CONDITIONAL_IF', r'=if +'),
-    ('CONDITIONAL_ELIF', r'=elif +'),
-    ('CONDITIONAL_ELSE', r'=else\n+'),
-    ('END_CONDITIONAL', r'=endif+'),
+    ('START_INPUT', r'\['),
+    ('END_INPUT', r'\]'),
+    ('SIMPLE_IF', r'=if +'),
+    ('OUTPUT_IF', r'=if= +'),
+    ('SIMPLE_ELIF', r'=elif +'),
+    ('OUTPUT_ELIF', r'=elif= +'),
+    ('SIMPLE_ELSE', r'=else\n+'),
+    ('END_CONTROL', r'=endif+'),
     ('AMPER', r'=&'),
     ('AT', r'=@'),
     ('EQUAL', r'='),
-    ('NEWLINE', r'\n'),
-    ('SPACE', r'\s+'),
 ]
 
 regex_map = {k: (k, v) for k, v in regex_pairs}
@@ -46,12 +44,38 @@ regex_map = {k: (k, v) for k, v in regex_pairs}
 valid_tokens = [x for x in regex_map]
 valid_tokens.append('TEXT')
 
-template = r'(?P<{name}>{regex})'
 
+input_pattern = re.compile(r'.*\[.*\]$')
+control_pattern = re.compile(r'\=if\=|\=elif\=|\=if|\=elif|\=else|\=endif')
+output_pattern = re.compile(r'\$[a-zA-Z_]\w*')
+output_line_pattern = re.compile(r'.*\$[a-zA-Z_]\w*')
 
-input_pattern = re.compile(r'\[.*\]$')
-control_pattern = re.compile(r'\=if')
-output_pattern = re.compile(r'\$.+')
+input_lexer = ox.make_lexer([
+    regex_map['NAME'],
+    regex_map['EQUAL'],
+    regex_map['AMPER'],
+    regex_map['AT'],
+    regex_map['START_INPUT'],
+    regex_map['END_INPUT'],
+])
+
+output_lexer = ox.make_lexer([
+    regex_map['OUTPUT_VAR'],
+    regex_map['OUTPUT_ATTR'],
+    regex_map['PAREN_O'],
+    regex_map['PAREN_C'],
+    regex_map['NAME'],
+    regex_map['PIPE_FILTER'],
+])
+
+control_lexer = ox.make_lexer([
+    regex_map['SIMPLE_IF'],
+    regex_map['OUTPUT_IF'],
+    regex_map['SIMPLE_ELIF'],
+    regex_map['OUTPUT_ELIF'],
+    regex_map['SIMPLE_ELSE'],
+    regex_map['END_CONTROL'],
+])
 
 class Lexer():
 
@@ -63,38 +87,47 @@ class Lexer():
     def tokenize(self):
         while self.line_stack:
             line = normalize_line(self.line_stack.pop())
-            print()
-            if input_pattern.match(line):
+
+            if control_pattern.match(line):
+                yield from self.tokenize_control_line(line)
+            elif input_pattern.match(line):
                 yield from self.tokenize_input_line(line)
-            elif control_pattern.match(line):
-                ...
+            elif output_line_pattern.match(line):
+                yield from self.tokenize_output_line(line)
             else:
-              yield from self.tokenize_output_line(line)
+                yield Token('TEXT', line)
 
 
     def tokenize_input_line(self, line):
         start, _, end = line.rpartition('[')
-        input_data = end[:-1]
-        yield from self.tokenize_output_line(line)
-        yield Token('START_INPUT', '[')
-        yield from input_lexer(input_data)
-        yield Token('END_INPUT', ']')
+        if start != '' and _ != '':
+            input_data = end[:-1]
+            yield from self.tokenize_output_line(start)
+            yield from input_lexer('[%s]' % input_data)
+        else:
+            yield from self.tokenize_output_line(end)
+
 
     def tokenize_output_line(self, line):
-        yield from output_lexer(line)
+        while line:
+            match = output_pattern.search(line)
+            
+            if match is None:
+                yield Token('TEXT', line)
+                break
+            else:
+                i, j = match.span()
+                if i != 0:
+                    yield Token('TEXT', line[0:i])
+                yield Token('OUTPUT_VAR', line[i + 1:j])
+                line = line[j:]
+                
 
-
-input_lexer = ox.make_lexer([
-    regex_map['NAME'],
-    regex_map['EQUAL'],
-    regex_map['AMPER'],
-    regex_map['AT'],
-])
-
-output_lexer = ox.make_lexer([
-    regex_map['OUTPUT_VAR'],
-    regex_map['OUTPUT_ATTR'],
-])
+    def tokenize_control_line(self, line):
+        match = control_pattern.match(line)
+        i, j = match.span()
+        yield from control_lexer(line[i:j])
+        yield from self.tokenize_input_line(line[j + 1:]) 
 
 
 def tokenize(source):
@@ -124,6 +157,9 @@ class Token(ox_token):
         return NotImplemented
 
 
-s = '$person // simple input'
+_s = 'Hello $name! How old are you? [age=int]'
+cs = '=if $is_minor\n=elif= Do you want to proceed? [proceed=bool]\n=endif'
+bs = 'Name: [name]'
+s = '$person|title'
 a = tokenize(s)
 print(a)
