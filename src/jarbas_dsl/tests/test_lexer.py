@@ -65,9 +65,9 @@ def test_default_value_user_input():
 
 # Test of multiple lines source code
 def test_lexer_multiple_lines():
-    string = "Name: [$name] //comment here\n Hello $name.title()!"
+    string = "Name: [$name] //comment here\n Hello $name.title!"
     expected = ["Name: ", "[", "$name","]", " ", "//comment here", "\n Hello ",
-                "$name", ".title", "(", ")", "!"]
+                "$name", ".title", "!"]
     test_lexer(string, expected)
 
 
@@ -79,8 +79,8 @@ def test_lexer_if_conditional():
 
 
 def test_lexer_elif_conditional():
-    string = "=elif Do you want to proceed? [$proceed=bool]"
-    expected = ["=elif ", "Do you want to proceed? ", "[", "$proceed", "=", "bool", "]"]
+    string = "=elif= Do you want to proceed? [proceed=bool]"
+    expected = ["=elif= ", "Do you want to proceed? ", "[", "proceed", "=", "bool", "]"]
     test_lexer(string, expected)
 
 
@@ -91,9 +91,9 @@ def test_lexer_else_conditional():
 
 
 def test_lexer_all_conditionals():
-    string = "=if $is_minor($age)\nYou cannot proceed.\n=elif Do you want to proceed?\
- [$proceed=bool]\nOk, let's go!\n=else\nBye!\n=endif"
-    expected = ["=if ", "$is_minor", "(", "$age", ")", "\nYou cannot proceed.\n", "=elif ",
-                "Do you want to proceed? ", "[", "$proceed", "=", "bool", "]", "\nOk, let's go!\n",
+    string = "=if $is_minor\nYou cannot proceed.\n=elif= Do you want to proceed?\
+ [proceed=bool]\nOk, let's go!\n=else\nBye!\n=endif"
+    expected = ["=if ", "$is_minor", "\nYou cannot proceed.\n", "=elif= ",
+                "Do you want to proceed? ", "[", "proceed", "=", "bool", "]", "\nOk, let's go!\n",
                 "=else\n", "Bye!\n", "=endif"]
     test_lexer(string, expected)

@@ -15,15 +15,10 @@ each "word" into a language token
 # tokens on a given string and also could be called
 # the language alphabet
 regex_pairs = [
-    ('NUMBER', r'([0-9]+\.[0-9]+)|([0-9]+)'),
-    ('STRING', r'\'.*\''),
-    ('BOOLEAN', r'True|False'),
-    ('OUTPUT_VAR', r'\$[a-zA-Z][a-zA-Z0-9_]*'),
-    ('OUTPUT_ATTR', r'\.[a-zA-Z][a-zA-Z0-9_]*'),
+    ('OUTPUT_VAR', r'\$[a-zA-Z_]\w*'),
+    ('OUTPUT_ATTR', r'\.[a-zA-Z_]\w*'),
     ('NAME', r'[a-zA-Z][a-zA-Z0-9_]*'),
     ('PIPE_FILTER', r'\|'),
-    ('PAREN_O', r'\('),
-    ('PAREN_C', r'\)'),
     ('START_INPUT', r'\['),
     ('END_INPUT', r'\]'),
     ('SIMPLE_IF', r'=if +'),
@@ -47,8 +42,9 @@ valid_tokens.append('TEXT')
 
 input_pattern = re.compile(r'.*\[.*\]$')
 control_pattern = re.compile(r'\=if\=|\=elif\=|\=if|\=elif|\=else|\=endif')
-output_pattern = re.compile(r'\$[a-zA-Z_]\w*')
+output_pattern = re.compile(r'\$[a-zA-Z_]\w*(\.[a-zA-Z_]\w*)*')
 output_line_pattern = re.compile(r'.*\$[a-zA-Z_]\w*')
+
 
 input_lexer = ox.make_lexer([
     regex_map['NAME'],
@@ -62,8 +58,6 @@ input_lexer = ox.make_lexer([
 output_lexer = ox.make_lexer([
     regex_map['OUTPUT_VAR'],
     regex_map['OUTPUT_ATTR'],
-    regex_map['PAREN_O'],
-    regex_map['PAREN_C'],
     regex_map['NAME'],
     regex_map['PIPE_FILTER'],
 ])
@@ -111,15 +105,16 @@ class Lexer():
     def tokenize_output_line(self, line):
         while line:
             match = output_pattern.search(line)
-            
+
             if match is None:
                 yield Token('TEXT', line)
                 break
             else:
+                print('aepda')
                 i, j = match.span()
                 if i != 0:
                     yield Token('TEXT', line[0:i])
-                yield Token('OUTPUT_VAR', line[i + 1:j])
+                yield from output_lexer(line[i:j])
                 line = line[j:]
                 
 
@@ -130,12 +125,14 @@ class Lexer():
         yield from self.tokenize_input_line(line[j + 1:]) 
 
 
+def normalize_line(line):
+    return line.partition('//')[0].rstrip()
+
+
 def tokenize(source):
     lex = Lexer(source)
     return list(lex.tokenize())
 
-def normalize_line(line):
-    return line.partition('//')[0].rstrip()
 
 class Token(ox_token):
     """
@@ -157,9 +154,9 @@ class Token(ox_token):
         return NotImplemented
 
 
-_s = 'Hello $name! How old are you? [age=int]'
-cs = '=if $is_minor\n=elif= Do you want to proceed? [proceed=bool]\n=endif'
-bs = 'Name: [name]'
-s = '$person|title'
-a = tokenize(s)
-print(a)
+# _s = 'Hello $name! How old are you? [age=int]'
+# cs = '=if $is_minor\n=elif= Do you want to proceed? [proceed=bool]\n=endif'
+# bs = 'Name: [name]'
+# s = 'Hello $person.title.losd.asdaosh.saodh.asodh!'
+# a = tokenize(s)
+# print(a)
