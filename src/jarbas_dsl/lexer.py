@@ -44,6 +44,7 @@ input_pattern = re.compile(r'.*\[.*\]$')
 control_pattern = re.compile(r'\=if\=|\=elif\=|\=if|\=elif|\=else|\=endif')
 output_pattern = re.compile(r'\$[a-zA-Z_]\w*(\.[a-zA-Z_]\w*)*')
 output_line_pattern = re.compile(r'.*\$[a-zA-Z_]\w*')
+filter_pattern = re.compile(r'\|[a-zA-Z_]\w*')
 
 
 input_lexer = ox.make_lexer([
@@ -70,6 +71,7 @@ control_lexer = ox.make_lexer([
     regex_map['SIMPLE_ELSE'],
     regex_map['END_CONTROL'],
 ])
+
 
 class Lexer():
 
@@ -110,13 +112,28 @@ class Lexer():
                 yield Token('TEXT', line)
                 break
             else:
-                print('aepda')
+                #print(match)
                 i, j = match.span()
                 if i != 0:
                     yield Token('TEXT', line[0:i])
+
                 yield from output_lexer(line[i:j])
-                line = line[j:]
                 
+                line = line[j:]
+                match = filter_pattern.search(line)
+
+                if match is None:
+                    yield Token('TEXT', line)
+                    break
+                else:
+                   # print(match)
+                    i, j = match.span()
+                    if i != 0:
+                        yield Token('TEXT', line[0:i])
+
+                    yield from output_lexer(line[i:j])
+                    line = line[j:]
+
 
     def tokenize_control_line(self, line):
         match = control_pattern.match(line)
@@ -154,9 +171,9 @@ class Token(ox_token):
         return NotImplemented
 
 
-# _s = 'Hello $name! How old are you? [age=int]'
+s = '=if $condition'
 # cs = '=if $is_minor\n=elif= Do you want to proceed? [proceed=bool]\n=endif'
 # bs = 'Name: [name]'
 # s = 'Hello $person.title.losd.asdaosh.saodh.asodh!'
-# a = tokenize(s)
-# print(a)
+a = tokenize(s)
+print(a)

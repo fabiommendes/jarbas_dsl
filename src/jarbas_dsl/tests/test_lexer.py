@@ -34,47 +34,46 @@ def test_pipe_operator():
 
 def test_comment():
     string = "Hello $person.name! // attribute access"
-    expected = ["Hello ", "$person", ".name", "! ", "// attribute access"]
+    expected = ["Hello ", "$person", ".name", "!"]
     test_lexer(string, expected)
 
 
 # Tests of user input token
 def test_simple_user_input():
-    string = "Name: [$name] Hello $name!"
-    expected = ["Name: ", "[", "$name", "]", " Hello ", "$name", "!"]
+    string = "Name: [name]\nHello $name!"
+    expected = ["Name: ", "[", "name", "]", "Hello ", "$name", "!"]
     test_lexer(string, expected)
 
 
 def test_defined_type_user_input():
-    string = "Name: [$age=int] Hello $name!"
-    expected = ["Name: ", "[", "$age", "=", "int", "]", " Hello ", "$name", "!"]
+    string = "Name: [age=int]\nHello $name!"
+    expected = ["Name: ", "[", "age", "=", "int", "]", "Hello ", "$name", "!"]
     test_lexer(string, expected)
 
 
 def test_function_validation_user_input():
-    string = "Name: [$email=&email] Hello $name!"
-    expected = ["Name: ", "[", "$email", "=&", "email", "]", " Hello ", "$name", "!"]
+    string = "Name: [email=&email]\nHello $name!"
+    expected = ["Name: ", "[", "email", "=&", "email", "]", "Hello ", "$name", "!"]
     test_lexer(string, expected)
 
 
 def test_default_value_user_input():
-    string = "Name: [$github=@email] Hello $name!"
-    expected = ["Name: ", "[", "$github", "=@", "email", "]", " Hello ", "$name", "!"]
+    string = "Name: [github=@email]\nHello $name!"
+    expected = ["Name: ", "[", "github", "=@", "email", "]", "Hello ", "$name", "!"]
     test_lexer(string, expected)
 
 
 # Test of multiple lines source code
 def test_lexer_multiple_lines():
-    string = "Name: [$name] //comment here\n Hello $name.title!"
-    expected = ["Name: ", "[", "$name","]", " ", "//comment here", "\n Hello ",
-                "$name", ".title", "!"]
+    string = "Name: [name] //comment here\nHello $name.title!"
+    expected = ["Name: ", "[", "name","]", "Hello ", "$name", ".title", "!"]
     test_lexer(string, expected)
 
 
 # Tests of conditional execution
 def test_lexer_if_conditional():
     string = "=if $condition"
-    expected = ["=if ", "$condition"]
+    expected = ["=if", "$condition"]
     test_lexer(string, expected)
 
 
