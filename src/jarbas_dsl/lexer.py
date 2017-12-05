@@ -25,7 +25,7 @@ regex_pairs = [
     ('OUTPUT_IF', r'=if= +'),
     ('SIMPLE_ELIF', r'=elif +'),
     ('OUTPUT_ELIF', r'=elif= +'),
-    ('SIMPLE_ELSE', r'=else\n+'),
+    ('SIMPLE_ELSE', r'=else+'),
     ('END_CONTROL', r'=endif+'),
     ('AMPER', r'=&'),
     ('AT', r'=@'),
@@ -112,7 +112,6 @@ class Lexer():
                 yield Token('TEXT', line)
                 break
             else:
-                #print(match)
                 i, j = match.span()
                 if i != 0:
                     yield Token('TEXT', line[0:i])
@@ -122,11 +121,12 @@ class Lexer():
                 line = line[j:]
                 match = filter_pattern.search(line)
 
-                if match is None:
+                if line == '':
+                    break
+                elif match is None:
                     yield Token('TEXT', line)
                     break
                 else:
-                   # print(match)
                     i, j = match.span()
                     if i != 0:
                         yield Token('TEXT', line[0:i])
@@ -169,11 +169,3 @@ class Token(ox_token):
         elif isinstance(other, str):
             return self.value < other
         return NotImplemented
-
-
-s = '=if $condition'
-# cs = '=if $is_minor\n=elif= Do you want to proceed? [proceed=bool]\n=endif'
-# bs = 'Name: [name]'
-# s = 'Hello $person.title.losd.asdaosh.saodh.asodh!'
-a = tokenize(s)
-print(a)

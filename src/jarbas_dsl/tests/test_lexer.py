@@ -28,7 +28,7 @@ def test_lexer_method_calling():
 
 def test_pipe_operator():
     string = "Hello $name|title!"
-    expected = ["Hello ", "$name", "|title", "!"]
+    expected = ["Hello ", "$name", "|", "title", "!"]
     test_lexer(string, expected)
 
 
@@ -79,20 +79,20 @@ def test_lexer_if_conditional():
 
 def test_lexer_elif_conditional():
     string = "=elif= Do you want to proceed? [proceed=bool]"
-    expected = ["=elif= ", "Do you want to proceed? ", "[", "proceed", "=", "bool", "]"]
+    expected = ["=elif=", "Do you want to proceed? ", "[", "proceed", "=", "bool", "]"]
     test_lexer(string, expected)
 
 
 def test_lexer_else_conditional():
-    string = "=else \n"
-    expected = ["=", "else \n"]
+    string = "=if $condition\nHello\n=else"
+    expected = ["=if","$condition", "Hello","=else"]
     test_lexer(string, expected)
 
 
 def test_lexer_all_conditionals():
     string = "=if $is_minor\nYou cannot proceed.\n=elif= Do you want to proceed?\
  [proceed=bool]\nOk, let's go!\n=else\nBye!\n=endif"
-    expected = ["=if ", "$is_minor", "\nYou cannot proceed.\n", "=elif= ",
-                "Do you want to proceed? ", "[", "proceed", "=", "bool", "]", "\nOk, let's go!\n",
-                "=else\n", "Bye!\n", "=endif"]
+    expected = ["=if", "$is_minor", "You cannot proceed.", "=elif=",
+                "Do you want to proceed? ", "[", "proceed", "=", "bool", "]", "Ok, let's go!",
+                "=else", "Bye!", "=endif"]
     test_lexer(string, expected)
