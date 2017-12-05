@@ -17,7 +17,7 @@ each "word" into a language token
 regex_pairs = [
     ('OUTPUT_VAR', r'\$[a-zA-Z_]\w*'),
     ('OUTPUT_ATTR', r'\.[a-zA-Z_]\w*'),
-    ('NAME', r'[a-zA-Z][a-zA-Z0-9_]*'),
+    ('NAME', r'[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)*'),
     ('PIPE_FILTER', r'\|'),
     ('START_INPUT', r'\['),
     ('END_INPUT', r'\]'),
@@ -95,10 +95,11 @@ class Lexer():
 
 
     def tokenize_input_line(self, line):
-        start, _, end = line.rpartition('[')
-        if start != '' and _ != '':
+        _, start, end = line.rpartition('[')
+
+        if start != '':
             input_data = end[:-1]
-            yield from self.tokenize_output_line(start)
+            yield from self.tokenize_output_line(_)
             yield from input_lexer('[%s]' % input_data)
         else:
             yield from self.tokenize_output_line(end)
