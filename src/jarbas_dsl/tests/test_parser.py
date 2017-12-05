@@ -1,11 +1,11 @@
 import pytest
 import jarbas_dsl
-from jarbas_dsl.parser import Parser
+from jarbas_dsl.parser import parse
 
 
 @pytest.fixture
 def test_parser(test_string):
-    return str(Parser(test_string).parse())
+    return str(parse(test_string))
 
 
 """

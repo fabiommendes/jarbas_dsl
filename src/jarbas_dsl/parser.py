@@ -91,11 +91,6 @@ class Parser(object):
         return parser(self.tokens)
 
 
-var_name = "[name]"
-p = Parser(var_name)
-a = p.parse()
-print(a)
-#print(a[1])
-#b = mu(a)
-#b = map(lambda x: ('expr', ('variable', (x[0].data, ('attrib', x[1].data)))), a)
-#print(p.parse())
+def parse(src):
+    p = Parser(src)
+    return p.parse()
