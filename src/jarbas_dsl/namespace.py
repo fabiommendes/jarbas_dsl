@@ -32,4 +32,16 @@ class Namespace:
             return attr
         except KeyError:
             raise AttributeError(path)
+
+    def set_attr_with_path(self, path, value):
+        try:
+            split_path = path.split('.')
+            dict_path = 'self.__data'
+
+            for var in split_path:
+                dict_path +='[' + var + ']'
+
+            exec(dict_path + "='" + value + "'")
+        except KeyError:
+            raise AttributeError(path)
         
