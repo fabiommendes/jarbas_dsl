@@ -1,6 +1,6 @@
 import collections
-
-from .namespace import Namespace
+from namespace import Namespace
+from parser import Text, Var, Attr, parse
 
 
 class Runner:
@@ -19,8 +19,29 @@ class Runner:
         """
 
         namespace = normalize_namespace(namespace)
-        raise NotImplementedError
+ 
+        output_line = ''
+        input_act = None
 
+        for action in self.ast.components:
+            if isinstance(action, Text):
+               output_line += action.value
+
+            elif isinstance(action, Var):
+                try:
+                    var = getattr(namespace, action.id)
+                    output_line += var
+                except AttributeError:
+                    raise NotImplementedError
+
+            elif isinstance(action, Attr):
+                try:
+                    attr = namespace.get_attr_with_path(action.path)
+                    output_line += attr
+                except AttributeError:
+                    raise NotImplementedError
+
+        print(output_line)
 
 def normalize_namespace(namespace):
     """
@@ -33,3 +54,9 @@ def normalize_namespace(namespace):
         return Namespace(namespace)
     else:
         return namespace
+
+
+s = 'Hello $person.name!'
+p = parse(s)
+r = Runner(p)
+r.run({'person': {'name': 'Agnaldo'}})

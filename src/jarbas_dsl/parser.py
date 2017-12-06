@@ -1,6 +1,6 @@
 import sys
 import ox
-from jarbas_dsl.lexer import tokenize, valid_tokens
+from lexer import tokenize, valid_tokens
 from collections import namedtuple
 
 
@@ -66,6 +66,7 @@ parser_rules = [
     ('output_attr : output_var chained_attr', output_chained_attr),
     ('output_attr : output_var OUTPUT_ATTR', lambda x, y: Attr(path = x.id + y)),
     ('output_var : OUTPUT_VAR', lambda x: Var(id = x[1:])),
+    ('chained_attr : chained_attr OUTPUT_ATTR', lambda x, y: x + [y]),
     ('chained_attr : OUTPUT_ATTR OUTPUT_ATTR', lambda x, y: [x] + [y]),
     ('text : TEXT', lambda token: Text(value = token)),
 ]
@@ -82,7 +83,6 @@ class Parser(object):
     def __init__(self, source):
         self.source = source
         self.tokens = tokenize(source)
-        print(self.tokens)
 
     def parse(self):
         """
