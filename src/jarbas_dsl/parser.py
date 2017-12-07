@@ -10,7 +10,7 @@ Filter = namedtuple('Filter', 'target filter')
 Expr = namedtuple('Expr', 'components')
 Text = namedtuple('Text', 'value')
 Input = namedtuple('Input', 'save_in type default validate_func')
-Conditional = namedtuple('Condtional', 'type condition')
+Conditional = namedtuple('Condtional', 'type condition text')
 
 
 # Input
@@ -49,9 +49,24 @@ def attr_filter(attr, pipe, filter):
     return Filter(target = attr.path, filter = filter)
 
 
+# Conditional
+def simple_conditional(x, y, z):
+    condition_type = 'simple_' + x[1:]
+    return Conditional(type=condition_type, condition=y, text=None)
+
+def output_conditional(t, o, c, z):
+    condition_type = 'output_' + t.split('=')[1]
+    return Conditional(type=condition_type, condition=c, text=o.value)
+
 parser_rules = [
     ('expr : expr utility', lambda x, y: Expr(components = x.components + [y])),
     ('expr : utility', lambda x: Expr(components = [x])),
+    #('expr : conditional' , lambda x: Expr(components = [x])),
+    #('conditional : SIMPLE_ELSE', output_conditional),                
+    # ('conditional : OUTPUT_ELIF text input END_CONTROL', output_conditional),
+    # ('conditional : SIMPLE_ELIF output_var END_CONTROL', simple_conditional),
+    # ('conditional : OUTPUT_IF text input END_CONTROL', output_conditional),
+    # ('conditional : SIMPLE_IF output_var END_CONTROL', simple_conditional),
     ('utility : filter', lambda x: x),        
     ('utility : input', lambda x: x),        
     ('utility : output_attr', lambda x: x),    

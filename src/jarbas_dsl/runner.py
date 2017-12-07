@@ -59,7 +59,10 @@ class Runner:
                             raise ValueError("Invalid type %s" % action.type)
                     
                     elif action.default:
-                        pass
+                        if raw_data == '':
+                            namespace.set_value(action.save_in, namespace.get_attr(action.default))
+                        else:
+                            namespace.set_value(action.save_in, raw_data)
                     elif action.validate_func:
                         pass
                     else:
