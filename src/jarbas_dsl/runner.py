@@ -19,35 +19,28 @@ class Runner:
         """
 
         namespace = normalize_namespace(namespace)
- 
-        input_act = None
-        output_line = ''
-        has_input = False
 
         for action in self.ast.components:
 
             if isinstance(action, Text):
-               output_line += action.value
-
+                print(action.value, end="")
             elif isinstance(action, Var):
                 try:
                     attr = getattr(namespace, action.id)
-                    output_line += attr
+                    print(attr, end="")
                 except AttributeError:
                     raise ValueError("ariable %s not defined" % action.id)
 
             elif isinstance(action, Attr):
                 try:
-                    attr = namespace.get_attr_with_path(action.path)
-                    output_line += attr
+                    attr = namespace.get_attr(action.path)
+                    print(attr, end="")
                 except AttributeError:
                     raise ValueError("attribute %s not defined" % action.path)
 
             elif isinstance(action, Input):
-                has_input = True
                 try:
-                    attr = namespace.get_attr_with_path(action.save_in)
-                    raw_data = input(output_line)
+                    raw_data = input()
 
                     if action.type:
                         if action.type == 'int':
@@ -70,14 +63,11 @@ class Runner:
                     elif action.validate_func:
                         pass
                     else:
-                        namespace.set_attr_with_path(action.save_in, raw_data)
+                        namespace.set_value(action.save_in, raw_data)
                 except AttributeError:
-                    pass
+                    raise AttributeError(raw_data)
                     
                     #raise ValueError("Variable or Attribute %s or Filter %s doesn't exist" % (action.save_in, action.filter))
-        
-        if not has_input:
-            print(output_line)
 
 
 def normalize_namespace(namespace):
@@ -94,8 +84,8 @@ def normalize_namespace(namespace):
 
 
 
-s = 'What is your name? [person.name]\n\nHello $person.name'
 f = open('./input_file.jb')
 p = parse(f.read())
+#p = parse(s)
 r = Runner(p)
-r.run({'person': {'name': ''}})
+r.run({'person': {'name': 'João', 'age': ''}})

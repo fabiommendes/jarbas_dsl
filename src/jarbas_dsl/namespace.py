@@ -21,27 +21,22 @@ class Namespace:
         except KeyError:
             raise AttributeError('attribute %s does not exist!' % attr)
 
-    def get_attr_with_path(self, path):
-        try:
-            split_path = path.split('.')
-            attr = self.__data[split_path[0]]
 
-            for var in split_path[1:]:
-                attr = attr.get(var, None)
+    def get_value(self, keys):
+        d = self.__data
+        for key in keys:
+            d = d[key]
+        return d
 
-            return attr
-        except KeyError:
-            raise AttributeError(path)
+    def set_value(self, path, value):
+        keys = path.split('.')
+        d = self.get_value(keys[:-1])
+        d[keys[-1]] = value
 
-    def set_attr_with_path(self, path, value):
-        try:
-            split_path = path.split('.')
-            dict_path = 'self.__data'
-
-            for var in split_path:
-                dict_path +='[' + var + ']'
-
-            exec(dict_path + "='" + value + "'")
-        except KeyError:
-            raise AttributeError(path)
-        
+    def get_attr(self, path):
+        keys = path.split('.')
+        d = self.__data
+        for key in keys:
+            d = d[key]
+        return d
+   
