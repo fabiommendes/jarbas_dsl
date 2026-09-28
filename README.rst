@@ -1,3 +1,7 @@
+.. warning::
+
+   This project is no longer maintained. For interactive command-line apps, see `questionary <https://github.com/tmbo/questionary>`_ and `typer <https://typer.tiangolo.com>`_.
+
 Jarbas DSL is a small Domain Specific Language to describe interactions between
 the user and the computer in a command line interface. It is designed to be used
 in the Jarbas project, but it might also be useful elsewhere.
